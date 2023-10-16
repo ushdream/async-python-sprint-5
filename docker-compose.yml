@@ -6,26 +6,22 @@ networks:
 
 services:
   pg:
-    build:
-      context: ./dockerization
-      dockerfile: Dockerfile-db
-    image: postgres:15
+    image: postgres:14.8-alpine3.18
     ports:
-      - "5832:5432"
+      - "5932:5432"
 
     networks:
       - ya_net
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U my"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
     environment:
       - POSTGRES_USER=me
       - POSTGRES_PASSWORD=1111111
       - POSTGRES_DB=my
-      - PGDATA=/var/lib/postgresql/data/pgdata
-      - DATABASE_URL=postgresql+asyncpg://me:1111111@pg:5432/my
+      #- DATABASE_URL=postgresql+asyncpg://me:1111111@pg:5432/my
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U me" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   fapi:
     build:
