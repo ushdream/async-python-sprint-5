@@ -1,0 +1,42 @@
+version: '3'
+
+networks:
+  ya_net:
+    driver: bridge
+
+services:
+  pg:
+
+    image: postgres:15
+    ports:
+      - "5832:5432"
+
+    networks:
+      - ya_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U me"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    environment:
+      - POSTGRES_USER=me
+      - POSTGRES_PASSWORD=1111111
+      - POSTGRES_DB=my
+      - PGDATA=/var/lib/postgresql/data/pgdata
+      - DATABASE_URL=postgresql+asyncpg://me:1111111@pg:5432/my
+      - PORT=3000
+
+  fapi:
+    build:
+      context: ./dockerization
+      dockerfile: Dockerfile-fapi
+    depends_on:
+      pg:
+        condition: service_healthy
+
+    networks:
+      - ya_net
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_DSN=postgresql+asyncpg://me:1111111@pg:5432/my
