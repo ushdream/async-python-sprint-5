@@ -6,7 +6,9 @@ networks:
 
 services:
   pg:
-
+    build:
+      context: ./dockerization
+      dockerfile: Dockerfile-db
     image: postgres:15
     ports:
       - "5832:5432"
@@ -24,7 +26,6 @@ services:
       - POSTGRES_DB=my
       - PGDATA=/var/lib/postgresql/data/pgdata
       - DATABASE_URL=postgresql+asyncpg://me:1111111@pg:5432/my
-      - PORT=3000
 
   fapi:
     build:
