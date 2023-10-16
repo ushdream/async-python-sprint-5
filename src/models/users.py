@@ -3,7 +3,6 @@ from datetime import datetime
 
 from .base import Base
 
-
 class USERs(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, autoincrement=True)
