@@ -1,0 +1,13 @@
+# Use an official Python runtime as the base image
+FROM python:3.11
+
+WORKDIR /app
+
+# Copy the application files from GitHub
+RUN git clone https://github.com/ushdream/fastapi_service.git /app
+
+RUN pip install --no-cache-dir --upgrade -r /app/src/requirements.txt
+
+EXPOSE 8200
+
+CMD alembic upgrade head && python3 src/main.py
