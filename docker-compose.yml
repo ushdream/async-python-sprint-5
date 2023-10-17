@@ -24,11 +24,12 @@ services:
       context: .
       dockerfile: Dockerfile-fapi
     depends_on:
-      - pg:
-        - condition: service_healthy
+      pg:
+        condition: service_healthy
     networks:
       - ya_net
     ports:
       - "8000:8000"
     environment:
       - DATABASE_DSN=postgresql+asyncpg://me:1111111@pg:5432/my
+    restart: always
