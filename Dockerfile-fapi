@@ -6,7 +6,7 @@ WORKDIR /app
 # Copy the application files from GitHub
 RUN git clone https://github.com/ushdream/async-python-sprint-5 /app
 
-RUN pip install --no-cache-dir --upgrade -r /app/src/requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
 
 EXPOSE 8200
 
