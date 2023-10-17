@@ -14,12 +14,13 @@ from core.config import app_settings
 
 app = FastAPI(
     title=app_settings.app_title,
-    docs_url='/api/openapi',
-    openapi_url='/api/openapi.json',
+    #docs_url='/api/openapi',
+    #openapi_url='/api/openapi.json',
     default_response_class=ORJSONResponse,
 )
 
 logging.info(f'\n_______________________\nFastAPI started\n_______________________\n')
+print(f'base.api_router: {base.api_router}')
 app.include_router(base.api_router)
 logging.info(f'api_router included')
 

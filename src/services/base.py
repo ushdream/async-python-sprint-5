@@ -1,4 +1,3 @@
-from abc import ABC
 import datetime
 import logging
 from typing import Any, List, Optional, Type, TypeVar
@@ -11,32 +10,14 @@ from sqlalchemy.sql import text
 ModelType = TypeVar("ModelType", bound=Base)
 UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
 
-
-class Repository(ABC):
-
-    def get(self, *args, **kwargs):
-        raise NotImplementedError
-
-    def get_multi(self, *args, **kwargs):
-        raise NotImplementedError
-
-    def create(self, *args, **kwargs):
-        raise NotImplementedError
-
-    def update(self, *args, **kwargs):
-        raise NotImplementedError
-
-    def delete(self, *args, **kwargs):
-        raise NotImplementedError
-
-    def post(self, *args, **kwargs):
-        raise NotImplementedError
+from .repository import Repository
 
 
 class RepositoryDB(Repository):
-    def __init__(self, model_urls: Type[ModelType], model_urllogger: Type[ModelType]):
+    def __init__(self, model_urls: Type[ModelType], model_urllogger: Type[ModelType], model_users: Type[ModelType]):
         self._model_urls = model_urls
         self._model_urllogger = model_urllogger
+        self._model_users = model_users
 
     async def get(self, db: AsyncSession, id: Any) -> Optional[ModelType]:
         statement = select(self._model_urls).where(self._model.id == id)

@@ -8,6 +8,6 @@ RUN git clone https://github.com/ushdream/async-python-sprint-5 /app
 
 RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
 
-EXPOSE 8200
+EXPOSE 8000
 
 CMD alembic upgrade head && python3 src/main.py
