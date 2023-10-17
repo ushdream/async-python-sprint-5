@@ -13,13 +13,19 @@ services:
       - ya_net
     ports:
       - "5832:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   fapi:
     build:
       context: .
       dockerfile: Dockerfile-fapi
     depends_on:
-      - pg
+      - pg:
+        - condition: service_healthy
     networks:
       - ya_net
     ports:
