@@ -23,9 +23,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile-fapi
-    depends_on:
-      pg:
-        condition: service_healthy
     networks:
       - ya_net
     ports:
@@ -33,3 +30,6 @@ services:
     environment:
       - DATABASE_DSN=postgresql+asyncpg://me:1111111@pg:5432/my
     restart: always
+    depends_on:
+      pg:
+        condition: service_healthy
