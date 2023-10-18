@@ -7,8 +7,8 @@ WORKDIR /app
 #RUN git clone https://github.com/ushdream/async-python-sprint-5 /app
 COPY . .
 
-RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
+RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
 EXPOSE 8000
-
-CMD "alembic revision --autogenerate -m 01_initial-db && alembic upgrade head && python3 src/main.py"
+ENTRYPOINT sleep 30
+CMD "alembic upgrade head && python3 src/main.py"

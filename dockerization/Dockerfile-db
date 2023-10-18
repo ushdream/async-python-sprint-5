@@ -1,8 +1,0 @@
-FROM postgres:15
-
-VOLUME ["/var/lib/postgresql/data", "/docker-entrypoint-initdb.d"]
-
-EXPOSE 5432
-
-CMD ["postgres"]
-
