@@ -24,6 +24,8 @@ class AppSettings(BaseSettings):
 
     echo_query: bool = True
 
+    YA_BUCKET_NAME: str = 'automaticaly-created-bucket-141'
+
     class Config:
         env_file = '../.env'
 

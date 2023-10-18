@@ -1,18 +1,25 @@
 import datetime
 import logging
 import random
+import uuid
 
-from typing import Any, List
+from typing import Optional, Annotated, List, Any
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status, UploadFile
+from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from authentication.auth_utils import fake_users_db, pwd_context, authenticate_user, Token, create_access_token
+from authentication.auth_utils import ACCESS_TOKEN_EXPIRE_MINUTES, User, get_current_active_user
 
 from db.db import get_session
 from services.entity import entity_crud
 from core.config import app_settings
 
+from services.yaclou import yos
+
 router = APIRouter()
-print(f'route is made')
+logging.info(f'route is made')
 
 
 async def check_allowed_ip(request: Request):
@@ -31,6 +38,63 @@ async def check_allowed_ip(request: Request):
 
     if is_ip_banned(request):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+
+
+@router.post("/file/{path}/upload-file")
+async def upload_file(
+        urrent_user: Annotated[User, Depends(get_current_active_user)],
+        *,
+        db: AsyncSession = Depends(get_session),
+        file: UploadFile,
+        path: Optional[str] = ""
+) -> int:
+
+    logging.info(f'path: {path}')
+    logging.info(f'upload_file: {file}')
+    logging.info(f'dir(file): {dir(file)}')
+
+    file_uuid = str(uuid.uuid4())
+    id = await entity_crud.store_file_info(
+        db,
+        file_name=file.filename,
+        path=path,
+        size=file.size,
+        file_id=file_uuid,
+    )
+
+    yos.store_bytes(file.file.read(), file_uuid)
+
+    return id
+
+@router.get("/check_me_file", status_code=status.HTTP_200_OK)
+async def read_own_items_file(
+        current_user: Annotated[User, Depends(get_current_active_user)]
+):
+    logging.info(f'user is authorized: {current_user}')
+    return {'user': current_user}
+@router.get("/file/download/")
+async def download_file(
+        current_user: Annotated[User, Depends(get_current_active_user)], *, db: AsyncSession = Depends(get_session), id: str,):
+    file_name = await entity_crud.get_fname_by_id(db, id)
+    try:
+     data = yos.get_file(id)
+    except Exception as e:
+        logging.exception(f'File: {id} has not been received from Yandex')
+        HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'File: {id} has not been received from Yandex')
+
+    logging.info(f'File downloaded from Ya')
+    try:
+        tmp_fname = 'tmpbin'
+        with open(tmp_fname, 'wb') as file:
+            file.write(data)
+        logging.info(f'File stored locally')
+        if file_name == '':
+            file_name = 'NoName'
+    except Exception as e:
+        logging.exception(f'Error: writing file locally: {e}')
+        HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f'Error during the storing the file')
+
+    return FileResponse(path=tmp_fname, filename=file_name, media_type='multipart/form-data')
 
 
 @router.post(
@@ -83,11 +147,20 @@ async def ping(db: AsyncSession = Depends(get_session)) -> dict:
     """
     db_ready = await entity_crud.ping(db=db)
     if not db_ready:
-        print(f'db is not ready')
+        logging.info(f'db is not ready')
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Data Base is unavailable"
         )
     return {'db_ready': db_ready}
+
+
+@router.get(
+    "/files",
+    description='Get parameters list'
+)
+async def get_files_info(db: AsyncSession = Depends(get_session)):
+    files_info_list = await entity_crud.get_files_info(db)
+    return files_info_list
 
 
 @router.get(

@@ -1,5 +1,6 @@
 from abc import ABC
 
+
 class Repository(ABC):
 
     def get(self, *args, **kwargs):

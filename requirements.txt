@@ -18,3 +18,4 @@ python-jose[cryptography]
 typing_extensions==4.8.0
 uvicorn~=0.23.2
 python-dotenv
+boto3

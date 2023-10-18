@@ -9,5 +9,6 @@ class USERs(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_name = Column(String(256), unique=True, nullable=False)
     secret_hashed = Column(String(128))
-    disabled = Column(bool)
+    disabled = Column(Boolean)
+    account_id = Column(String(96))
     created_at = Column(DateTime, index=True, default=datetime.utcnow)
