@@ -1,4 +1,4 @@
-fastapi > 0.103
+fastapi==0.103
 orjson==3.8.0
 pydantic==2.4.1
 pydantic-settings==2.0.3
@@ -8,14 +8,13 @@ SQLAlchemy-Utils==0.38.3
 asyncpg==0.26.0
 psycopg2-binary==2.9.3
 databases[postgresql]==0.6.1
-python-multipart
-alembic
+python-multipart==0.06
+alembic==1.12
 
-python-multipart
 passlib[bcrypt]~=1.7.4
-rsa
-python-jose[cryptography]
+rsa==4.9
+python-jose[cryptography]==3.3.0
 typing_extensions==4.8.0
 uvicorn~=0.23.2
-python-dotenv
-boto3
+python-dotenv==1.0.0
+boto3==1.28.65

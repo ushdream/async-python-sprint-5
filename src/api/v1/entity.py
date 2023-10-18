@@ -9,8 +9,9 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status, UploadFi
 from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from authentication.auth_utils import fake_users_db, pwd_context, authenticate_user, Token, create_access_token
-from authentication.auth_utils import ACCESS_TOKEN_EXPIRE_MINUTES, User, get_current_active_user
+import aiofiles
+
+from authentication.auth_utils import User, get_current_active_user
 
 from db.db import get_session
 from services.entity import entity_crud
@@ -19,7 +20,7 @@ from core.config import app_settings
 from services.yaclou import yos
 
 router = APIRouter()
-logging.info(f'route is made')
+logging.info('route is made')
 
 
 async def check_allowed_ip(request: Request):
@@ -48,7 +49,6 @@ async def upload_file(
         file: UploadFile,
         path: Optional[str] = ""
 ) -> int:
-
     logging.info(f'path: {path}')
     logging.info(f'upload_file: {file}')
     logging.info(f'dir(file): {dir(file)}')
@@ -66,33 +66,39 @@ async def upload_file(
 
     return id
 
+
 @router.get("/check_me_file", status_code=status.HTTP_200_OK)
 async def read_own_items_file(
         current_user: Annotated[User, Depends(get_current_active_user)]
 ):
     logging.info(f'user is authorized: {current_user}')
     return {'user': current_user}
+
+
 @router.get("/file/download/")
 async def download_file(
-        current_user: Annotated[User, Depends(get_current_active_user)], *, db: AsyncSession = Depends(get_session), id: str,):
+        current_user: Annotated[User, Depends(get_current_active_user)],
+        *,
+        db: AsyncSession = Depends(get_session),
+        id: str, ):
     file_name = await entity_crud.get_fname_by_id(db, id)
     try:
-     data = yos.get_file(id)
+        data = yos.get_file(id)
     except Exception as e:
-        logging.exception(f'File: {id} has not been received from Yandex')
+        logging.exception(f'File: {id} has not been received from Yandex:\n {e}')
         HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'File: {id} has not been received from Yandex')
 
-    logging.info(f'File downloaded from Ya')
+    logging.info('File downloaded from Ya')
     try:
         tmp_fname = 'tmpbin'
-        with open(tmp_fname, 'wb') as file:
-            file.write(data)
-        logging.info(f'File stored locally')
+        async with aiofiles.open(tmp_fname, 'wb') as file:
+            await file.write(data)
+        logging.info('File stored locally')
         if file_name == '':
             file_name = 'NoName'
     except Exception as e:
         logging.exception(f'Error: writing file locally: {e}')
-        HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f'Error during the storing the file')
+        HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Error during the storing the file')
 
     return FileResponse(path=tmp_fname, filename=file_name, media_type='multipart/form-data')
 
@@ -114,6 +120,7 @@ async def new_url_list(
     :return: dict {'short_url': short_url}, where short_url - generated short url
     """
 
+    urls_original = urls_original or []
     returned_value = []
     for url_item in urls_original:
         logging.info(f'url_item: {url_item}')
@@ -147,7 +154,7 @@ async def ping(db: AsyncSession = Depends(get_session)) -> dict:
     """
     db_ready = await entity_crud.ping(db=db)
     if not db_ready:
-        logging.info(f'db is not ready')
+        logging.info('db is not ready')
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Data Base is unavailable"
         )

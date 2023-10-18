@@ -63,28 +63,28 @@ def get_password_hash(password):
 
 
 def get_user(db, username: str):
-    logging.info(f'get user')
+    logging.info('get user')
     if username in db:
         user_dict = db[username]
         logging.info(f'user: {username}')
         return UserInDB(**user_dict)
-    logging.info(f'user is not found')
+    logging.info('user is not found')
 
 
 def authenticate_user(fake_db, username: str, password: str):
-    logging.info(f'authenticate_user')
+    logging.info('authenticate_user')
     user = get_user(fake_db, username)
     logging.info(f'user: {user}')
     if not user:
         return False
     if not verify_password(password, user.hashed_password):
-        logging.info(f'password is not veryfied')
+        logging.info('password is not veryfied')
         return False
     return user
 
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
-    logging.info(f'create access token')
+    logging.info('create access token')
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta

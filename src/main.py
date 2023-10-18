@@ -13,9 +13,9 @@ app = FastAPI(
     default_response_class=ORJSONResponse,
 )
 
-logging.info(f'\n_______________________\nApplication started\n_______________________\n')
+logging.info('\n_______________________\nApplication started\n_______________________\n')
 app.include_router(base.api_router)
-logging.info(f'api_router included')
+logging.info('api_router included')
 
 if __name__ == '__main__':
     print('__main__')

@@ -11,7 +11,3 @@ class URLs(Base):
     url_short = Column(String(256), unique=True, nullable=False)
     created_at = Column(DateTime, index=True, default=datetime.utcnow)
     deleted = Column(Boolean, unique=False, nullable=True)
-
-
-
-

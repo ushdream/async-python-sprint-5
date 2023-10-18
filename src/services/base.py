@@ -11,10 +11,10 @@ import uuid
 
 from models.base import Base
 
+from .repository import Repository
+
 ModelType = TypeVar("ModelType", bound=Base)
 UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
-
-from .repository import Repository
 
 
 class RepositoryDB(Repository):
@@ -48,7 +48,7 @@ class RepositoryDB(Repository):
         return next_id
 
     async def ping(self, db) -> bool:
-        logging.info(f'ping')
+        logging.info('ping')
         statement = select(True)
         try:
             q_result = await db.execute(statement=statement)
@@ -56,16 +56,15 @@ class RepositoryDB(Repository):
             logging.info(f'result_one: {result}')
         except Exception as e:
             result = False
-            logging.info(f'CRUD: ping: False')
+            logging.info(f'CRUD: ping: False:\n{e}')
         return result
 
     async def ping_all(self, db) -> dict:
-        logging.info(f'pnig_all')
-        logging.info(f'ping all')
+        logging.info('ping all')
         result = {}
         begin = datetime.datetime.now()
         try:
-            logging.info(f'Call query')
+            logging.info('Call query')
             q_result = await db.execute(statement=text('select 1'))
             logging.info(f'Query result: {q_result}')
             end = datetime.datetime.now()
@@ -76,13 +75,13 @@ class RepositoryDB(Repository):
             else:
                 result['DB'] = 'Unavailable'
         except Exception as e:
-            logging.info(f'ping exception')
-            logging.exception(f'Error: connecting to DB')
+            logging.info('ping exception')
+            logging.exception(f'Error: connecting to DB: \n{e}')
             result['DB'] = 'Unavailable'
         return result
 
     async def new_url(self, db: AsyncSession, data: dict):
-        logging.info(f'CRUD: new_url')
+        logging.info('CRUD: new_url')
         statement = insert(self._model_urls).values(data).returning(self._model_urls.id)
         result = await db.execute(statement=statement)
         row = result.fetchone()
@@ -125,7 +124,7 @@ class RepositoryDB(Repository):
         return row.id
 
     async def get_files_info(self, db: AsyncSession) -> dict:
-        logging.info(f'Get files info')
+        logging.info('Get files info')
         statement = select(self._model_files)
         q_result = await db.execute(statement=statement)
         await db.commit()
